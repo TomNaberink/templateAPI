@@ -1,6 +1,16 @@
+'use client'
+
 import TestChatBot from '@/components/TestChatBot'
 
 export default function Home() {
+  const handleCopyInstruction = () => {
+    navigator.clipboard.writeText('lees instructies.md')
+  }
+
+  const handleCopyEnvLocal = () => {
+    navigator.clipboard.writeText('GEMINI_API_KEY=your_actual_api_key_here')
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100">
       <div className="container mx-auto px-4 py-16">
@@ -73,8 +83,12 @@ export default function Home() {
                 <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-gray-400">.env.local</span>
-                    <button className="text-purple-400 hover:text-purple-300 text-xs">
-                      Kopieer
+                    <button 
+                      onClick={handleCopyEnvLocal}
+                      className="text-purple-400 hover:text-purple-300 text-xs transition-colors"
+                      title="Kopieer .env.local inhoud"
+                    >
+                      📋 Kopieer
                     </button>
                   </div>
                   <code>GEMINI_API_KEY=your_actual_api_key_here</code>
@@ -89,16 +103,36 @@ export default function Home() {
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
                   Stap 3: Test je API Key & Alle Features
                 </h3>
-                <p className="text-gray-600 mb-4">
-                  Test je API key en probeer alle functies uit: chatten, spraakherkenning en documenten uploaden.
-                </p>
                 <TestChatBot />
               </div>
 
-              {/* Step 4 - Build Step */}
+              {/* Step 4 - Bolt Instructions */}
               <div className="border-l-4 border-purple-500 pl-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  Stap 4: Bouwen maar!
+                  Stap 4: Werken met Bolt
+                </h3>
+                <p className="text-gray-600 mb-3">
+                  Voordat je begint met bouwen in Bolt, zeg tegen Bolt dat het de ontwikkelingsinstructies moet lezen:
+                </p>
+                <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-400">Instructie voor Bolt</span>
+                    <button 
+                      onClick={handleCopyInstruction}
+                      className="text-purple-400 hover:text-purple-300 text-xs transition-colors"
+                      title="Kopieer instructie"
+                    >
+                      📋 Kopieer
+                    </button>
+                  </div>
+                  <code>lees instructies.md</code>
+                </div>
+              </div>
+
+              {/* Step 5 - Build Step (previously Step 4) */}
+              <div className="border-l-4 border-purple-500 pl-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  Stap 5: Bouwen maar!
                 </h3>
                 <p className="text-gray-600">
                   Wat ga jij maken om het onderwijs te verbeteren?
