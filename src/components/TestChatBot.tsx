@@ -71,13 +71,24 @@ export default function TestChatBot() {
         body: formData,
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        setUploadedContent(data.content)
-        setMessage(prev => prev + '\n\nBestand inhoud:\n' + data.content.substring(0, 500) + (data.content.length > 500 ? '...' : ''))
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Upload failed')
       }
+
+      const data = await response.json()
+      setUploadedContent(data.content)
+      
+      // Improved message formatting
+      const fileInfo = `📎 ${data.filename} (${data.fileType})\n`
+      const contentPreview = data.content.length > 300 
+        ? data.content.substring(0, 300) + '...' 
+        : data.content
+      
+      setMessage(prev => prev + '\n\n' + fileInfo + 'Inhoud:\n' + contentPreview)
     } catch (error) {
       console.error('File upload error:', error)
+      alert('Fout bij uploaden: ' + (error instanceof Error ? error.message : 'Onbekende fout'))
     }
   }
 

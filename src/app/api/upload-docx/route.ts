@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import mammoth from 'mammoth'
-import pdf from 'pdf-parse'
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,10 +36,16 @@ export async function POST(request: NextRequest) {
       textContent = result.value
       fileType = 'Word Document (.docx)'
     } else if (isPdf) {
-      // Extract text from .pdf using pdf-parse
-      const pdfData = await pdf(buffer)
-      textContent = pdfData.text
-      fileType = 'PDF Document (.pdf)'
+      // Extract text from .pdf using pdf-parse with dynamic import
+      try {
+        const pdfParse = (await import('pdf-parse')).default
+        const pdfData = await pdfParse(buffer)
+        textContent = pdfData.text
+        fileType = 'PDF Document (.pdf)'
+      } catch (pdfError) {
+        console.error('PDF parsing error:', pdfError)
+        return NextResponse.json({ error: 'Fout bij het lezen van het PDF bestand' }, { status: 400 })
+      }
     }
 
     return NextResponse.json({
