@@ -5,7 +5,7 @@ import VoiceInput from './VoiceInput'
 import FileUpload from './FileUpload'
 
 export default function TestChatBot() {
-  const [messages, setMessages] = useState<Array<{type: 'user' | 'bot', content: string}>>([])
+  const [messages, setMessages] = useState<Array<{type: 'user' | 'bot', content: string, assistant: 'arnoud' | 'tom'}>>([])
   const [currentMessage, setCurrentMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -43,11 +43,42 @@ export default function TestChatBot() {
     }
   }
 
+  const askTom = async () => {
+    if (messages.length === 0) return
+
+    setIsLoading(true)
+    const context = messages.map(m => `${m.type === 'user' ? 'Student' : m.assistant === 'tom' ? 'Tom' : 'Arnoud'}: ${m.content}`).join('\n\n')
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message: `Je bent Tom, een AI expert. Je geeft altijd een interessante AI-gerelateerde opmerking over het gesprek. Dit is het gesprek tot nu toe:\n\n${context}\n\nGeef jouw AI-gerelateerde inzicht op dit gesprek.` 
+        }),
+      })
+
+      if (!res.ok) throw new Error('Failed to get response')
+
+      const data = await res.json()
+      setMessages(prev => [...prev, { type: 'bot', content: data.response, assistant: 'tom' }])
+    } catch (error) {
+      setMessages(prev => [...prev, { 
+        type: 'bot', 
+        content: 'Sorry, er ging iets mis met mijn AI-circuits! 🤖', 
+        assistant: 'tom'
+      }])
+    } finally {
+      setIsLoading(false)
+      setTimeout(scrollToBottom, 100)
+    }
+  }
+
   const sendMessage = async () => {
     if (!currentMessage.trim()) return
 
     const userMessage = currentMessage
-    setMessages(prev => [...prev, { type: 'user', content: userMessage }])
+    setMessages(prev => [...prev, { type: 'user', content: userMessage, assistant: 'arnoud' }])
     setCurrentMessage('')
     setIsLoading(true)
 
@@ -63,11 +94,12 @@ export default function TestChatBot() {
       if (!res.ok) throw new Error('Failed to get response')
 
       const data = await res.json()
-      setMessages(prev => [...prev, { type: 'bot', content: data.response }])
+      setMessages(prev => [...prev, { type: 'bot', content: data.response, assistant: 'arnoud' }])
     } catch (error) {
       setMessages(prev => [...prev, { 
         type: 'bot', 
-        content: 'Ha! Zelfs mijn computer humor werkt niet meer! 😅\nEr is helaas een technisch probleem opgetreden.' 
+        content: 'Ha! Zelfs mijn computer humor werkt niet meer! 😅\nEr is helaas een technisch probleem opgetreden.',
+        assistant: 'arnoud'
       }])
     } finally {
       setIsLoading(false)
@@ -98,13 +130,19 @@ export default function TestChatBot() {
               className={`max-w-[80%] rounded-lg p-4 ${
                 message.type === 'user'
                   ? 'bg-blue-600 text-white'
+                  : message.assistant === 'tom'
+                  ? 'bg-emerald-50 text-gray-800'
                   : 'bg-gray-100 text-gray-800'
               }`}
             >
               {message.type === 'bot' && (
                 <div className="flex items-center mb-2">
-                  <span className="text-xl mr-2">👨‍🏫</span>
-                  <span className="font-medium">Arnoud</span>
+                  <span className="text-xl mr-2">
+                    {message.assistant === 'tom' ? '🤖' : '👨‍🏫'}
+                  </span>
+                  <span className="font-medium">
+                    {message.assistant === 'tom' ? 'Tom' : 'Arnoud'}
+                  </span>
                 </div>
               )}
               <p className="whitespace-pre-wrap">{message.content}</p>
@@ -138,6 +176,15 @@ export default function TestChatBot() {
             title="Bestand uploaden"
           >
             📎
+          </button>
+          <button
+            onClick={askTom}
+            disabled={isLoading || messages.length === 0}
+            className="ml-auto px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
+            title="Vraag Tom's AI perspectief"
+          >
+            <span>🤖</span>
+            <span>Vraag Tom</span>
           </button>
         </div>
         
