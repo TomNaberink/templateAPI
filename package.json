@@ -9,14 +9,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "netlify-build": "next build"
+    "lint": "next lint"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
+    "@netlify/plugin-nextjs": "^4.41.3",
     "docx": "^9.5.0",
     "fs": "^0.0.1-security",
     "mammoth": "^1.9.1",

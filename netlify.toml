@@ -1,10 +1,14 @@
 [build]
   command = "npm run build"
-  publish = ""
+  publish = ".next"
   
 [build.environment]
   NODE_VERSION = "18"
-  
+  NEXT_TELEMETRY_DISABLED = "1"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
 # Ensure API routes work properly
 [[redirects]]
   from = "/api/*"
@@ -16,11 +20,10 @@
   from = "/*"
   to = "/index.html"
   status = 200
-  conditions = {Role = ["admin"]}
 
 # Headers for security
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block" 
+    X-XSS-Protection = "1; mode=block"
