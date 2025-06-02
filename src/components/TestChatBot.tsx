@@ -11,7 +11,6 @@ export default function TestChatBot() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const recognitionRef = useRef<any>(null)
 
-  // Voice recognition setup
   const initializeVoiceRecognition = () => {
     if (typeof window !== 'undefined') {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
@@ -101,9 +100,7 @@ export default function TestChatBot() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          message: message + "\n\nReageer als een grappige chatbot. Maak een grap over dit onderwerp of vertel een leuke mop die hiermee te maken heeft. Houd het kort en bondig!" 
-        }),
+        body: JSON.stringify({ message }),
       })
 
       if (!res.ok) {
