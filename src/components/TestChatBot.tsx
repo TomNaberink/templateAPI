@@ -48,24 +48,28 @@ export default function TestChatBot() {
 
     setIsLoading(true)
     const context = messages.map(m => `${m.type === 'user' ? 'Student' : m.assistant === 'tom' ? 'Tom' : 'Arnoud'}: ${m.content}`).join('\n\n')
-
+    
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          message: `Je bent Tom, een AI expert. Je geeft altijd een interessante AI-gerelateerde opmerking over het gesprek. Dit is het gesprek tot nu toe:\n\n${context}\n\nGeef jouw AI-gerelateerde inzicht op dit gesprek.` 
+          message: `Je bent Tom, een AI expert die altijd enthousiast is over AI technologie. Geef een kort maar interessant AI-gerelateerd inzicht over dit gesprek. Gebruik maximaal 2 zinnen. Dit is het gesprek tot nu toe:\n\n${context}` 
         }),
       })
 
-      if (!res.ok) throw new Error('Failed to get response')
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Failed to get response')
+      }
 
       const data = await res.json()
       setMessages(prev => [...prev, { type: 'bot', content: data.response, assistant: 'tom' }])
     } catch (error) {
+      console.error('Error asking Tom:', error)
       setMessages(prev => [...prev, { 
         type: 'bot', 
-        content: 'Sorry, er ging iets mis met mijn AI-circuits! 🤖', 
+        content: 'Interessant! Dit doet me denken aan hoe Neural Networks werken, maar helaas zijn mijn circuits even in de war! 🤖', 
         assistant: 'tom'
       }])
     } finally {
@@ -87,15 +91,19 @@ export default function TestChatBot() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          message: `Je bent Arnoud, een afstudeerbegeleider die altijd grappen maakt. Geef eerst een grapje en daarna pas een serieus antwoord op deze vraag: ${userMessage}` 
+          message: `Je bent Arnoud, een afstudeerbegeleider die altijd grappen maakt. Begin ALTIJD met een korte grap of woordgrap die te maken heeft met de vraag. Gebruik daarna het 🤣 emoji. Begin dan een nieuwe regel met je serieuze antwoord. Dit is de vraag: ${userMessage}` 
         }),
       })
 
-      if (!res.ok) throw new Error('Failed to get response')
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Failed to get response')
+      }
 
       const data = await res.json()
       setMessages(prev => [...prev, { type: 'bot', content: data.response, assistant: 'arnoud' }])
     } catch (error) {
+      console.error('Error sending message:', error)
       setMessages(prev => [...prev, { 
         type: 'bot', 
         content: 'Ha! Zelfs mijn computer humor werkt niet meer! 😅\nEr is helaas een technisch probleem opgetreden.',
@@ -131,7 +139,7 @@ export default function TestChatBot() {
                 message.type === 'user'
                   ? 'bg-blue-600 text-white'
                   : message.assistant === 'tom'
-                  ? 'bg-emerald-50 text-gray-800'
+                  ? 'bg-emerald-100 border border-emerald-200 text-gray-800'
                   : 'bg-gray-100 text-gray-800'
               }`}
             >
@@ -153,7 +161,7 @@ export default function TestChatBot() {
           <div className="flex justify-start">
             <div className="bg-gray-100 rounded-lg p-4">
               <div className="flex items-center space-x-2">
-                <span className="text-xl">👨‍🏫</span>
+                <span className="text-xl">⏳</span>
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
