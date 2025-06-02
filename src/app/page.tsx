@@ -68,7 +68,7 @@ export default function Home() {
                   <code>GEMINI_API_KEY=your_actual_api_key_here</code>
                 </div>
                 <p className="text-orange-600 text-sm mt-2 font-medium">
-                  ⚠️ Vervang "your_actual_api_key_here" met je echte API key!
+                  ⚠️ Vervang "your_actual_api_key_here" met je echte API key! (zie stap 2)
                 </p>
               </div>
 
