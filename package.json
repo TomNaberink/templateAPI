@@ -2,11 +2,18 @@
   "name": "gemini-chatbot",
   "version": "0.1.0",
   "private": true,
+  "description": "Een Next.js template met Gemini AI integratie, geoptimaliseerd voor Bolt + Netlify deployment",
+  "keywords": ["nextjs", "gemini", "ai", "chatbot", "netlify", "bolt", "typescript"],
+  "author": "Tom Naberink",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "netlify-build": "next build"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",

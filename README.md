@@ -15,6 +15,7 @@ Een direct bruikbare Next.js template met een veilige Gemini API integratie en e
 - 🚀 **Next.js 15 & TypeScript**: Gebouwd met de nieuwste technologieën.
 - 🛠️ **Ultra-Lean**: Geen overbodige code, enkel de essentials.
 - 💡 **Onderwijs Focus**: Met een call-to-action gericht op onderwijsinnovatie.
+- 🌐 **Netlify Ready**: Geoptimaliseerd voor Bolt + Netlify deployment.
 
 ## 🚀 Snelle Start: In 4 Stappen naar Gemini!
 
@@ -41,6 +42,30 @@ Open [http://localhost:3000](http://localhost:3000) in je browser. Je kunt nu di
 
 ### Stap 4: Bouwen maar!
 Wat ga jij maken om het onderwijs te verbeteren? De Gemini API staat tot je beschikking!
+
+## 🌐 Netlify Deployment (via Bolt)
+
+### ⚡ Quick Deploy via Bolt.new:
+1. **In Bolt:** Klik "Deploy to Netlify"
+2. **Check Build Settings:** Ga naar Netlify → Site Settings → Build & Deploy
+   - ✅ Build command: `npm run build` 
+   - ✅ Publish directory: (leeg laten!)
+   - ✅ Base directory: (leeg laten!)
+3. **Add Environment Variable:** Site Settings → Environment Variables
+   - Key: `GEMINI_API_KEY`
+   - Value: jouw_echte_api_key
+4. **Redeploy:** Trigger nieuwe build na het toevoegen van de API key
+
+### 🚨 Veel voorkomende Netlify problemen:
+
+| Probleem | Oorzaak | Oplossing |
+|----------|---------|-----------|
+| **Blanco site** | Verkeerde publish directory | Zet publish directory op leeg |
+| **API errors** | GEMINI_API_KEY ontbreekt | Check environment variables + redeploy |
+| **Build fails** | Verkeerde build command | Zet build command op `npm run build` |
+| **404 op API routes** | Next.js routing issue | Check of `netlify.toml` aanwezig is |
+
+📋 **Gedetailleerde troubleshooting:** Zie [DEPLOYMENT.md](./DEPLOYMENT.md) voor een complete gids.
 
 ## 🛠️ API Gebruik (Voorbeeld)
 
@@ -84,6 +109,10 @@ async function callGemini(userMessage) {
 ```
 .
 ├── .env.local                # 🔑 Jouw API Key (zelf aanmaken!)
+├── .env.example              # 📝 Template voor environment variables
+├── .nvmrc                    # 🔧 Node version voor Netlify
+├── netlify.toml              # 🌐 Netlify configuratie
+├── DEPLOYMENT.md             # 📋 Deployment troubleshooting guide
 ├── .gitignore                # Beschermt gevoelige bestanden
 ├── next.config.js            # Next.js configuratie (dev UI uit)
 ├── package.json              # Project dependencies
@@ -113,7 +142,13 @@ De UI gebruikt Tailwind CSS met een paars kleurenschema. Pas `src/app/globals.cs
 
 ## 🚀 Deployment
 
-### Vercel (Aanbevolen)
+### Netlify (via Bolt.new - Aanbevolen)
+1. **In Bolt:** Gebruik "Deploy to Netlify" functie
+2. **Environment Variables:** Voeg `GEMINI_API_KEY` toe in Netlify dashboard
+3. **Check Settings:** Build command = `npm run build`, Publish directory = leeg
+4. **Troubleshoot:** Gebruik [DEPLOYMENT.md](./DEPLOYMENT.md) bij problemen
+
+### Vercel (Alternatief)
 1. Push je code naar GitHub.
 2. Ga naar [Vercel](https://vercel.com) en importeer je repository.
 3. Voeg je `GEMINI_API_KEY` toe als Environment Variable in de Vercel projectinstellingen.
@@ -127,8 +162,10 @@ Zorg ervoor dat je platform Node.js 18+ ondersteunt en je environment variabelen
 ## 🛡️ Ingebouwde Robuustheid
 - **Veilige API Keys**: Keys worden server-side gehouden.
 - **Input Validatie**: Basisvalidatie op de API route.
+- **Netlify Optimized**: `netlify.toml` en `.nvmrc` voor foutloze deploys.
 - **Development UI Uitgeschakeld**: `devIndicators: false` in `next.config.js` voor een clean dev ervaring.
 - **Hydration Warning Onderdrukt**: `suppressHydrationWarning` op `<body>` in `layout.tsx` voor compatibiliteit met browser extensies.
+- **Verbeterde Error Handling**: Duidelijke foutmeldingen voor debugging.
 
 ## 🤝 Bijdragen
 Voel je vrij om deze template te forken, te verbeteren en pull requests in te dienen!

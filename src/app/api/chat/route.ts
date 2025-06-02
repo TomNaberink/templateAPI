@@ -6,10 +6,15 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
 export async function POST(request: NextRequest) {
   try {
-    // Controleer of de API key is ingesteld
+    // Betere error handling voor Netlify
     if (!process.env.GEMINI_API_KEY) {
+      console.error('GEMINI_API_KEY not found in environment variables');
       return NextResponse.json(
-        { error: 'GEMINI_API_KEY is niet ingesteld' },
+        { 
+          error: 'API configuratie ontbreekt. Check Netlify Environment Variables.',
+          hint: 'Voeg GEMINI_API_KEY toe in Netlify Site Settings → Environment Variables',
+          debug: 'Environment variable GEMINI_API_KEY is not set'
+        }, 
         { status: 500 }
       )
     }
@@ -47,8 +52,17 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Fout bij het aanroepen van Gemini API:', error)
+    
+    // Betere error information voor debugging
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    
     return NextResponse.json(
-      { error: 'Er is een fout opgetreden bij het verwerken van je bericht' },
+      { 
+        error: 'Er is een fout opgetreden bij het verwerken van je bericht',
+        details: errorMessage,
+        timestamp: new Date().toISOString(),
+        hint: 'Check Netlify Function logs voor meer details'
+      },
       { status: 500 }
     )
   }
