@@ -1,222 +1,158 @@
 'use client'
 
-import { useState } from 'react'
-
-interface Question {
-  question: string
-  options: string[]
-  correctAnswer: string
-}
+import TestChatBot from '@/components/TestChatBot'
 
 export default function Home() {
-  const [keywords, setKeywords] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [quiz, setQuiz] = useState<Question[] | null>(null)
-  const [userAnswers, setUserAnswers] = useState<string[]>([])
-  const [showResults, setShowResults] = useState(false)
-
-  const generateQuiz = async () => {
-    if (!keywords.trim()) return
-    
-    setIsLoading(true)
-    setQuiz(null)
-    setUserAnswers([])
-    setShowResults(false)
-
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: `Genereer een multiple choice quiz met 3 vragen over het volgende onderwerp: ${keywords}. 
-          Geef het antwoord in dit JSON formaat:
-          {
-            "questions": [
-              {
-                "question": "De vraag hier",
-                "options": ["A) optie 1", "B) optie 2", "C) optie 3", "D) optie 4"],
-                "correctAnswer": "A) optie 1"
-              }
-            ]
-          }
-          Zorg ervoor dat het valide JSON is.`
-        }),
-      })
-
-      if (!res.ok) throw new Error('Failed to generate quiz')
-      
-      const data = await res.json()
-      try {
-        const cleanJson = data.response.replace(/^```json\n|\n```$/g, '').trim()
-        const parsedQuiz = JSON.parse(cleanJson)
-        setQuiz(parsedQuiz.questions)
-        setUserAnswers(new Array(parsedQuiz.questions.length).fill(''))
-      } catch (e) {
-        console.error('Failed to parse quiz JSON:', e)
-        throw new Error('Invalid quiz format')
-      }
-    } catch (error) {
-      console.error('Error:', error)
-      alert('Er ging iets mis bij het genereren van de quiz')
-    } finally {
-      setIsLoading(false)
-    }
+  const handleCopyInstruction = () => {
+    navigator.clipboard.writeText('lees instructies.md')
   }
 
-  const handleAnswer = (questionIndex: number, answer: string) => {
-    const newAnswers = [...userAnswers]
-    newAnswers[questionIndex] = answer
-    setUserAnswers(newAnswers)
-  }
-
-  const calculateScore = () => {
-    if (!quiz) return 0
-    return quiz.reduce((score, question, index) => {
-      return score + (question.correctAnswer === userAnswers[index] ? 1 : 0)
-    }, 0)
+  const handleCopyEnvLocal = () => {
+    navigator.clipboard.writeText('GEMINI_API_KEY=your_actual_api_key_here')
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 py-12 px-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">
-            MP Quiz Generator
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100">
+      <div className="container mx-auto px-4 py-16">
+        
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-600 rounded-full mb-6">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          
+          <h1 className="text-5xl font-bold text-gray-800 mb-4">
+            Gemini API Template
           </h1>
-          <p className="text-gray-600">
-            Voer een paar woorden in en test je kennis!
+          
+          <p className="text-xl text-purple-700 font-medium">
+            Dit is een template om met Gemini te werken, gemaakt door Tom Naberink
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <div className="flex gap-4">
-            <input
-              type="text"
-              value={keywords}
-              onChange={(e) => setKeywords(e.target.value)}
-              placeholder="Bijv: kunstmatige intelligentie, geschiedenis WO2..."
-              className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
-              onKeyPress={(e) => e.key === 'Enter' && generateQuiz()}
-            />
-            <button
-              onClick={generateQuiz}
-              disabled={isLoading || !keywords.trim()}
-              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {isLoading ? '⏳ Even denken...' : 'Genereer Quiz'}
-            </button>
-          </div>
-        </div>
-
-        {isLoading && (
-          <div className="text-center p-12">
-            <div className="inline-flex items-center space-x-2">
-              <div className="w-3 h-3 bg-purple-600 rounded-full animate-bounce"></div>
-              <div className="w-3 h-3 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-              <div className="w-3 h-3 bg-purple-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-            </div>
-          </div>
-        )}
-
-        {quiz && !showResults && (
-          <div className="space-y-8">
-            {quiz.map((q, qIndex) => (
-              <div key={qIndex} className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                  Vraag {qIndex + 1}: {q.question}
-                </h2>
-                <div className="space-y-3">
-                  {q.options.map((option, oIndex) => (
-                    <button
-                      key={oIndex}
-                      onClick={() => handleAnswer(qIndex, option)}
-                      className={`w-full p-3 rounded-lg text-left transition-colors ${
-                        userAnswers[qIndex] === option
-                          ? 'bg-purple-100 border border-purple-300'
-                          : 'bg-gray-50 hover:bg-gray-100'
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
+        {/* Main Content */}
+        <div className="max-w-4xl mx-auto">
+          
+          {/* Setup Instructions */}
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <h2 className="text-2xl font-bold text-purple-800 mb-6 flex items-center">
+              <span className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                🔧
+              </span>
+              Setup Instructies
+            </h2>
+            
+            <div className="space-y-6">
+              
+              {/* Step 1 */}
+              <div className="border-l-4 border-purple-500 pl-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  Stap 1: Verkrijg een Gemini API Key
+                </h3>
+                <p className="text-gray-600 mb-3">
+                  Ga naar Google AI Studio om je gratis API key aan te maken:
+                </p>
+                <a 
+                  href="https://makersuite.google.com/app/apikey" 
+                  target="_blank"
+                  className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                >
+                  <span>Verkrijg API Key</span>
+                  <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+                
+                <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                  <p className="text-orange-800 text-sm">
+                    ⚠️ <strong>Let op</strong>, je kunt gratis en risicovrij oefenen met de Gemini API. Daarnaast kun je 300,- dollar gratis budget krijgen. Als dat op, dan moet je het koppelen aan je creditcard. Zorg ervoor dat je weet wat je doet op dat moment!
+                  </p>
                 </div>
               </div>
-            ))}
 
-            <div className="text-center">
-              <button
-                onClick={() => setShowResults(true)}
-                disabled={userAnswers.some(answer => answer === '')}
-                className="px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Controleer Antwoorden
-              </button>
-            </div>
-          </div>
-        )}
-
-        {showResults && quiz && (
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                Je Score: {calculateScore()} van de {quiz.length}
-              </h2>
-              <p className="text-gray-600">
-                {calculateScore() === quiz.length 
-                  ? '🎉 Perfect! Alle antwoorden zijn correct!'
-                  : calculateScore() > quiz.length / 2
-                  ? '👏 Goed gedaan! Bijna alle antwoorden correct!'
-                  : '💪 Blijf oefenen! Je kunt het!'}
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              {quiz.map((q, qIndex) => (
-                <div key={qIndex} className="border rounded-lg p-4">
-                  <h3 className="font-medium text-gray-800 mb-2">
-                    Vraag {qIndex + 1}: {q.question}
-                  </h3>
-                  <div className="space-y-2">
-                    {q.options.map((option, oIndex) => (
-                      <div
-                        key={oIndex}
-                        className={`p-3 rounded-lg ${
-                          option === q.correctAnswer
-                            ? 'bg-green-100 border border-green-200'
-                            : option === userAnswers[qIndex]
-                            ? 'bg-red-100 border border-red-200'
-                            : 'bg-gray-50'
-                        }`}
-                      >
-                        {option}
-                        {option === q.correctAnswer && (
-                          <span className="ml-2 text-green-600">✓ Correct</span>
-                        )}
-                        {option === userAnswers[qIndex] && option !== q.correctAnswer && (
-                          <span className="ml-2 text-red-600">✗ Jouw antwoord</span>
-                        )}
-                      </div>
-                    ))}
+              {/* Step 2 */}
+              <div className="border-l-4 border-purple-500 pl-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  Stap 2: Maak een .env.local bestand
+                </h3>
+                <p className="text-gray-600 mb-3">
+                  Maak een nieuw bestand genaamd <code className="bg-gray-100 px-2 py-1 rounded text-sm">.env.local</code> in de root van je project:
+                </p>
+                <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-400">.env.local</span>
+                    <button 
+                      onClick={handleCopyEnvLocal}
+                      className="text-purple-400 hover:text-purple-300 text-xs transition-colors"
+                      title="Kopieer .env.local inhoud"
+                    >
+                      📋 Kopieer
+                    </button>
                   </div>
+                  <code>GEMINI_API_KEY=your_actual_api_key_here</code>
                 </div>
-              ))}
-            </div>
+                <p className="text-orange-600 text-sm mt-2 font-medium">
+                  ⚠️ Vervang "your_actual_api_key_here" met je echte API key!
+                </p>
+              </div>
 
-            <div className="text-center mt-8">
-              <button
-                onClick={() => {
-                  setQuiz(null)
-                  setUserAnswers([])
-                  setShowResults(false)
-                  setKeywords('')
-                }}
-                className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-              >
-                Nieuwe Quiz
-              </button>
+              {/* Step 3 - Enhanced Test Step */}
+              <div className="border-l-4 border-purple-500 pl-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  Stap 3: Test je API Key & Alle Features
+                </h3>
+                <TestChatBot />
+              </div>
+
+              {/* Step 4 - Bolt Instructions */}
+              <div className="border-l-4 border-purple-500 pl-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  Stap 4: Werken met Bolt
+                </h3>
+                <p className="text-gray-600 mb-3">
+                  Voordat je begint met bouwen in Bolt, zeg tegen Bolt dat het de ontwikkelingsinstructies moet lezen:
+                </p>
+                <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-400">Instructie voor Bolt</span>
+                    <button 
+                      onClick={handleCopyInstruction}
+                      className="text-purple-400 hover:text-purple-300 text-xs transition-colors"
+                      title="Kopieer instructie"
+                    >
+                      📋 Kopieer
+                    </button>
+                  </div>
+                  <code>lees instructies.md</code>
+                </div>
+              </div>
+
+              {/* Step 5 - Build Step */}
+              <div className="border-l-4 border-purple-500 pl-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  Stap 5: Bouwen maar!
+                </h3>
+                <p className="text-gray-600">
+                  Wat ga jij maken om het onderwijs te verbeteren?
+                </p>
+              </div>
             </div>
           </div>
-        )}
+
+          {/* Footer */}
+          <div className="text-center mt-12">
+            <div className="inline-flex items-center space-x-4 text-purple-600">
+              <span>💜</span>
+              <span>Veel succes met bouwen!</span>
+              <span>💜</span>
+            </div>
+            <p className="text-gray-500 text-sm mt-2">
+              Template door Tom Naberink • Powered by Next.js & Gemini AI
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )
