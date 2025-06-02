@@ -1,4 +1,5 @@
 import TestChatBot from '@/components/TestChatBot'
+import CopyButton from '@/components/CopyButton'
 
 export default function Home() {
   return (
@@ -46,12 +47,11 @@ export default function Home() {
                 <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-gray-400">.env.local</span>
-                    <button 
+                    <CopyButton 
+                      text="GEMINI_API_KEY=your_actual_api_key_here"
                       className="text-purple-400 hover:text-purple-300 text-xs transition-colors"
                       title="Kopieer .env.local inhoud"
-                    >
-                      📋 Kopieer
-                    </button>
+                    />
                   </div>
                   <code>GEMINI_API_KEY=your_actual_api_key_here</code>
                 </div>
@@ -105,12 +105,11 @@ export default function Home() {
                 <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-gray-400">Instructie voor Bolt</span>
-                    <button 
+                    <CopyButton 
+                      text="lees instructies.md"
                       className="text-purple-400 hover:text-purple-300 text-xs transition-colors"
                       title="Kopieer instructie"
-                    >
-                      📋 Kopieer
-                    </button>
+                    />
                   </div>
                   <code>lees instructies.md</code>
                 </div>
