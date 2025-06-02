@@ -2,19 +2,27 @@
 
 import { useState } from 'react'
 
+interface Question {
+  question: string
+  options: string[]
+  correctAnswer: string
+}
+
 export default function Home() {
   const [keywords, setKeywords] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [quiz, setQuiz] = useState<{
-    question: string
-    options: string[]
-    correctAnswer: string
-  }[] | null>(null)
+  const [quiz, setQuiz] = useState<Question[] | null>(null)
+  const [userAnswers, setUserAnswers] = useState<string[]>([])
+  const [showResults, setShowResults] = useState(false)
 
   const generateQuiz = async () => {
     if (!keywords.trim()) return
     
     setIsLoading(true)
+    setQuiz(null)
+    setUserAnswers([])
+    setShowResults(false)
+
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -39,10 +47,10 @@ export default function Home() {
       
       const data = await res.json()
       try {
-        // Clean the response string by removing markdown code block delimiters
         const cleanJson = data.response.replace(/^```json\n|\n```$/g, '').trim()
         const parsedQuiz = JSON.parse(cleanJson)
         setQuiz(parsedQuiz.questions)
+        setUserAnswers(new Array(parsedQuiz.questions.length).fill(''))
       } catch (e) {
         console.error('Failed to parse quiz JSON:', e)
         throw new Error('Invalid quiz format')
@@ -55,6 +63,19 @@ export default function Home() {
     }
   }
 
+  const handleAnswer = (questionIndex: number, answer: string) => {
+    const newAnswers = [...userAnswers]
+    newAnswers[questionIndex] = answer
+    setUserAnswers(newAnswers)
+  }
+
+  const calculateScore = () => {
+    if (!quiz) return 0
+    return quiz.reduce((score, question, index) => {
+      return score + (question.correctAnswer === userAnswers[index] ? 1 : 0)
+    }, 0)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 py-12 px-4">
       <div className="max-w-2xl mx-auto">
@@ -63,7 +84,7 @@ export default function Home() {
             MP Quiz Generator
           </h1>
           <p className="text-gray-600">
-            Voer een paar woorden in en krijg direct een quiz!
+            Voer een paar woorden in en test je kennis!
           </p>
         </div>
 
@@ -97,7 +118,7 @@ export default function Home() {
           </div>
         )}
 
-        {quiz && (
+        {quiz && !showResults && (
           <div className="space-y-8">
             {quiz.map((q, qIndex) => (
               <div key={qIndex} className="bg-white rounded-xl shadow-lg p-6">
@@ -106,23 +127,94 @@ export default function Home() {
                 </h2>
                 <div className="space-y-3">
                   {q.options.map((option, oIndex) => (
-                    <div
+                    <button
                       key={oIndex}
-                      className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                        option === q.correctAnswer
-                          ? 'bg-green-100 border border-green-200'
+                      onClick={() => handleAnswer(qIndex, option)}
+                      className={`w-full p-3 rounded-lg text-left transition-colors ${
+                        userAnswers[qIndex] === option
+                          ? 'bg-purple-100 border border-purple-300'
                           : 'bg-gray-50 hover:bg-gray-100'
                       }`}
                     >
                       {option}
-                      {option === q.correctAnswer && (
-                        <span className="ml-2 text-green-600">✓</span>
-                      )}
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
             ))}
+
+            <div className="text-center">
+              <button
+                onClick={() => setShowResults(true)}
+                disabled={userAnswers.some(answer => answer === '')}
+                className="px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Controleer Antwoorden
+              </button>
+            </div>
+          </div>
+        )}
+
+        {showResults && quiz && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Je Score: {calculateScore()} van de {quiz.length}
+              </h2>
+              <p className="text-gray-600">
+                {calculateScore() === quiz.length 
+                  ? '🎉 Perfect! Alle antwoorden zijn correct!'
+                  : calculateScore() > quiz.length / 2
+                  ? '👏 Goed gedaan! Bijna alle antwoorden correct!'
+                  : '💪 Blijf oefenen! Je kunt het!'}
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              {quiz.map((q, qIndex) => (
+                <div key={qIndex} className="border rounded-lg p-4">
+                  <h3 className="font-medium text-gray-800 mb-2">
+                    Vraag {qIndex + 1}: {q.question}
+                  </h3>
+                  <div className="space-y-2">
+                    {q.options.map((option, oIndex) => (
+                      <div
+                        key={oIndex}
+                        className={`p-3 rounded-lg ${
+                          option === q.correctAnswer
+                            ? 'bg-green-100 border border-green-200'
+                            : option === userAnswers[qIndex]
+                            ? 'bg-red-100 border border-red-200'
+                            : 'bg-gray-50'
+                        }`}
+                      >
+                        {option}
+                        {option === q.correctAnswer && (
+                          <span className="ml-2 text-green-600">✓ Correct</span>
+                        )}
+                        {option === userAnswers[qIndex] && option !== q.correctAnswer && (
+                          <span className="ml-2 text-red-600">✗ Jouw antwoord</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="text-center mt-8">
+              <button
+                onClick={() => {
+                  setQuiz(null)
+                  setUserAnswers([])
+                  setShowResults(false)
+                  setKeywords('')
+                }}
+                className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                Nieuwe Quiz
+              </button>
+            </div>
           </div>
         )}
       </div>
