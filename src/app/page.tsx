@@ -39,7 +39,9 @@ export default function Home() {
       
       const data = await res.json()
       try {
-        const parsedQuiz = JSON.parse(data.response)
+        // Clean the response string by removing markdown code block delimiters
+        const cleanJson = data.response.replace(/^```json\n|\n```$/g, '').trim()
+        const parsedQuiz = JSON.parse(cleanJson)
         setQuiz(parsedQuiz.questions)
       } catch (e) {
         console.error('Failed to parse quiz JSON:', e)
