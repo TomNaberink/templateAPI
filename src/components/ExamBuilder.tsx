@@ -97,7 +97,10 @@ export default function ExamBuilder() {
               min="1"
               max="10"
               value={config.questionCount}
-              onChange={(e) => setConfig({ ...config, questionCount: parseInt(e.target.value) })}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 1;
+                setConfig({ ...config, questionCount: value });
+              }}
               className="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
               required
             />
